@@ -1,10 +1,33 @@
 import 'package:flutter/material.dart';
+
 import '../model/user_model.dart';
+import '../services/user_service.dart';
 
 class HomeViewModel extends ChangeNotifier {
-  UserModel usuario = UserModel(
-    nombre: "Jairo Yarasca",
-    saldo: 4580.50,
-    deuda: 1200.00,
-  );
+
+  final UserService _userService =
+      UserService();
+
+  UserModel? usuario;
+
+  bool loading = false;
+
+  Future<void> cargarUsuario(
+    String userId,
+  ) async {
+
+    loading = true;
+
+    notifyListeners();
+
+    usuario =
+        await _userService
+            .obtenerUsuario(
+      userId,
+    );
+
+    loading = false;
+
+    notifyListeners();
+  }
 }

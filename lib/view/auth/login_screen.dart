@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+
 import '../../ui/theme/app_colors.dart';
-import '../../viewmodel/auth_viewmodel.dart';
+import '../../services/auth_service.dart';
 import '../home/dashboard_screen.dart';
+import 'register_screen.dart';
+import 'reset_password_screen.dart';
+import '../../services/session_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,98 +17,235 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final usuarioController = TextEditingController();
   final passwordController = TextEditingController();
+  final authService = AuthService();
 
-  final viewModel = AuthViewModel();
+  bool loading = false;
+  bool obscurePassword = true;
+
+  InputDecoration _input(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, color: AppColors.primary),
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: AnimatedBuilder(
-        animation: viewModel,
-        builder: (context, _) {
-          if (viewModel.success) {
-            Future.microtask(() {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const DashboardScreen(),
-                ),
-              );
-            });
-          }
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF0D47A1), // azul fuerte
+              Color(0xFF1976D2), // azul medio
+              Color(0xFF42A5F5), // azul claro
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
 
-          return Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+                  const SizedBox(height: 20),
 
-                const Icon(
-                  Icons.account_balance,
-                  size: 90,
-                  color: AppColors.primary,
-                ),
-
-                const SizedBox(height: 10),
-
-                const Text(
-                  "Caja Metropolitana",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                  // LOGO SOLAMENTE
+                  Image.asset(
+                    "assets/logo.png",
+                    height: 90,
                   ),
-                ),
 
-                const SizedBox(height: 30),
+                  const SizedBox(height: 20),
 
-                TextField(
-                  controller: usuarioController,
-                  decoration: const InputDecoration(
-                    labelText: "DNI",
+                  const Text(
+                    "Bienvenido de nuevo",
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 15),
+                  const SizedBox(height: 5),
 
-                TextField(
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: "Contraseña",
+                  const Text(
+                    "Accede a tu banca móvil segura",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 20),
+                  const SizedBox(height: 25),
 
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                  // CARD
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 15,
+                          offset: const Offset(0, 8),
+                        )
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+
+                        // EMAIL
+                        TextField(
+                          controller: usuarioController,
+                          decoration: _input("Correo electrónico", Icons.person),
+                        ),
+
+                        const SizedBox(height: 15),
+
+                        // PASSWORD
+                        TextField(
+                          controller: passwordController,
+                          obscureText: obscurePassword,
+                          decoration: _input("Contraseña", Icons.lock).copyWith(
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                obscurePassword
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  obscurePassword = !obscurePassword;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // BOTÓN LOGIN
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0D47A1),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: loading
+                                ? null
+                                : () async {
+                                    setState(() => loading = true);
+
+                                    final error = await authService.login(
+                                      email: usuarioController.text.trim(),
+                                      password: passwordController.text.trim(),
+                                    );
+
+                                    setState(() => loading = false);
+
+                                    if (error == null) {
+                                      print("===== SESION =====");
+                                      print("USER ID: ${SessionService.userId}");
+                                      print("NOMBRE: ${SessionService.nombre}");
+                                      print("EMAIL: ${SessionService.email}");
+                                      print("ROL: ${SessionService.rol}");
+                                      print("==================");
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const DashboardScreen(),
+                                        ),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(content: Text(error)),
+                                      );
+                                    }
+                                  },
+                            child: loading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text(
+                                    "Ingresar",
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // LINKS
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const RegisterScreen(),
+                              ),
+                            );
+                          },
+                          child: const Text("Crear cuenta"),
+                        ),
+
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ResetPasswordScreen(),
+                              ),
+                            );
+                          },
+                          child: const Text("¿Olvidaste tu contraseña?"),
+                        ),
+                      ],
+                    ),
                   ),
-                  onPressed: () {
-                    viewModel.login(
-                      usuarioController.text,
-                      passwordController.text,
-                    );
-                  },
-                  child: const Text("Ingresar"),
-                ),
 
-                const SizedBox(height: 10),
+                  const SizedBox(height: 20),
 
-                if (viewModel.loading)
-                  const CircularProgressIndicator(),
-
-                if (viewModel.error.isNotEmpty)
-                  Text(
-                    viewModel.error,
-                    style: const TextStyle(color: Colors.red),
+                  // SEGURIDAD
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.lock, color: Colors.white70, size: 16),
+                      SizedBox(width: 6),
+                      Text(
+                        "Conexión segura y encriptada",
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    ],
                   ),
-              ],
+
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }

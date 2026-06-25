@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "23803536204",
+    "project_id": "cajametropolitanaapp",
+    "storage_bucket": "cajametropolitanaapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:23803536204:android:8622cd075ff4daf51ca5e9",
+        "android_client_info": {
+          "package_name": "com.example.appbanco_cajametropolitana_cliente"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9SzY8N2b4139uHaGQMKQ6mdQorY8pFAU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
