@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'view/auth/login_screen.dart';
 import 'view/home/timeline_solicitud_screen.dart';
+import 'view/home/notificaciones_screen.dart';
+import 'view/home/cronograma_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +26,12 @@ class MyApp extends StatelessWidget {
       routes: {
         "/timelineSolicitudes": (context) =>
             const TimelineSolicitudesScreen(),
+
+        // 👇 AQUÍ agregas la nueva ruta
+        '/notificaciones': (context) =>
+            const NotificacionesScreen(),
+
+        "/cronograma": (_) => const CronogramaScreen(),
       },
     );
   }

@@ -27,6 +27,7 @@ import 'solicitud_credito_screen.dart';
 import '../../model/transaction_model.dart';
 import '../../viewmodel/home_viewmodel.dart';
 
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -224,11 +225,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               const Text(
                 "Caja Metropolitana",
-                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              IconButton(
-                onPressed: _logout,
-                icon: const Icon(Icons.logout, color: Colors.white),
+
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications, color: Colors.white),
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/notificaciones');
+                    },
+                  ),
+                  IconButton(
+                    onPressed: _logout,
+                    icon: const Icon(Icons.logout, color: Colors.white),
+                  ),
+                ],
               ),
             ],
           ),

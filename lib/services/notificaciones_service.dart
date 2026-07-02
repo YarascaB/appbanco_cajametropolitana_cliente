@@ -1,24 +1,28 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
 import 'api_service.dart';
+import 'session_service.dart';
 
 class NotificacionesService {
 
-  Future<List<dynamic>> obtener(
-    String userId,
-  ) async {
+  Future<List<dynamic>> obtener() async {
 
     final response = await http.get(
 
       Uri.parse(
-        "${ApiService.baseUrl}/api/notificaciones/$userId",
+        "${ApiService.baseUrl}/api/notificaciones/${SessionService.userId}",
       ),
     );
 
-    final data =
-        jsonDecode(response.body);
+    final data = jsonDecode(response.body);
 
-    return data["notificaciones"] ?? [];
+    if (data["success"]) {
+
+      return data["notificaciones"];
+    }
+
+    return [];
   }
 }
